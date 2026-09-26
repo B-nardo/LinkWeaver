@@ -1,0 +1,142 @@
+@import 'tailwindcss';
+
+/*
+|------------------------------------------------------------------------------
+| Linkweaver design foundation
+|------------------------------------------------------------------------------
+|
+| Concept: a surveyor's instrument for mapping a website. The palette is drawn
+| from printed survey charts — warm paper, iron-gall ink, a single surveyor's
+| teal for opportunity and a burnt sienna reserved for orphans. Those two hues
+| are semantic, never decorative: teal always means "a link you could add",
+| sienna always means "a page nothing points to".
+|
+| Theme switching is attribute-driven (`data-theme` on <html>), resolved before
+| first paint by an inline script in index.html. `@theme inline` makes Tailwind
+| emit `var(--lw-*)` references rather than baking literal values, so a single
+| attribute flip re-themes every utility class.
+|
+*/
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Light: warm paper under daylight. */
+:root {
+  --lw-canvas: #f7f5f0;
+  --lw-surface: #ffffff;
+  --lw-sunken: #eeeae1;
+
+  --lw-line: #ded7c9;
+  --lw-line-strong: #c3b8a4;
+
+  --lw-ink: #1c1b18;
+  --lw-ink-soft: #55504a;
+  --lw-ink-faint: #837b6f;
+
+  --lw-opportunity: #0f7a6c;
+  --lw-opportunity-hover: #0b6053;
+  --lw-opportunity-wash: #e2f0ec;
+
+  --lw-orphan: #ad4a1e;
+  --lw-orphan-wash: #f7e7de;
+
+  --lw-graph-edge: #bdb3a2;
+}
+
+/* Dark: a backlit instrument panel, not an inverted document. */
+[data-theme='dark'] {
+  --lw-canvas: #1a1917;
+  --lw-surface: #232220;
+  --lw-sunken: #121211;
+
+  --lw-line: #34332d;
+  --lw-line-strong: #4b4942;
+
+  --lw-ink: #f2efe8;
+  --lw-ink-soft: #b4aea3;
+  --lw-ink-faint: #827c71;
+
+  --lw-opportunity: #3fcbb2;
+  --lw-opportunity-hover: #5fd9c3;
+  --lw-opportunity-wash: #14322d;
+
+  --lw-orphan: #e2825a;
+  --lw-orphan-wash: #3a2016;
+
+  --lw-graph-edge: #4b4942;
+}
+
+@theme inline {
+  /* Type: an engraved serif for display, a technical sans for UI, mono for
+     every number so columns align without manual tabular-nums everywhere. */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  --color-canvas: var(--lw-canvas);
+  --color-surface: var(--lw-surface);
+  --color-sunken: var(--lw-sunken);
+
+  --color-line: var(--lw-line);
+  --color-line-strong: var(--lw-line-strong);
+
+  --color-ink: var(--lw-ink);
+  --color-ink-soft: var(--lw-ink-soft);
+  --color-ink-faint: var(--lw-ink-faint);
+
+  --color-opportunity: var(--lw-opportunity);
+  --color-opportunity-hover: var(--lw-opportunity-hover);
+  --color-opportunity-wash: var(--lw-opportunity-wash);
+
+  --color-orphan: var(--lw-orphan);
+  --color-orphan-wash: var(--lw-orphan-wash);
+
+  --color-graph-edge: var(--lw-graph-edge);
+
+  /* Deliberately three radii, used for different classes of object: hairline
+     chrome, panels, and pills. Avoids the "everything is rounded-xl" look. */
+  --radius-hair: 2px;
+  --radius-panel: 6px;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  /* `data-theme` lives on <html>, so native form controls, scrollbars and
+     caret colours follow the chosen theme rather than the OS preference. */
+  html {
+    color-scheme: light;
+  }
+
+  html[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--lw-canvas);
+    color: var(--lw-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv05' 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers are data here; keep them aligned and unambiguous everywhere. */
+  :is(td, th) :is(.tabular, code),
+  .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One visible, high-contrast focus treatment for the whole app. Never
+     removed — reviewing suggestions is a keyboard-first workflow. */
+  :focus-visible {
+    outline: 2px solid var(--lw-opportunity);
+    outline-offset: 2px;
+    border-radius: var(--radius-hair);
+  }
+
+  ::selection {
+    background-color: var(--lw-opportunity-wash);
+    color: var(--lw-ink);
+  }
+}
