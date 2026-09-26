@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 import { ApiError } from './lib/api'
+import { AuthProvider } from './lib/auth'
 import { ThemeProvider } from './lib/theme'
 
 const queryClient = new QueryClient({
@@ -37,7 +38,10 @@ createRoot(rootElement).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <BrowserRouter>
-          <App />
+          {/* Inside the router so auth redirects can use navigation. */}
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>

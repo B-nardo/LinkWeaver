@@ -150,8 +150,36 @@ dashboard. The link graph is the product's hero.
 | No `intl` extension dependency | Not present on the dev machine, so CI omits it too for parity. IDN hosts are lowercased but not punycode-normalised; documented as a known limit. |
 | Tests run on MySQL, not SQLite | This PHP build has no `pdo_sqlite`, and matching production's engine avoids schema drift. |
 | ESLint, not the template's oxlint | The spec specifies ESLint. |
+| `symfony/css-selector` added | DomCrawler's `filter()` throws without it, and the spec's content selectors are CSS. A requirement of a named dependency, not a new choice. |
+| Sitemaps: DOCTYPE stripped before parsing | A sitemap is attacker-controlled input our server fetches. Stripping the DOCTYPE leaves any entity reference undefined, so the document is rejected rather than expanded. |
+| Normalised URLs capped at 500 chars | Keeps `(project_id, normalized_url)` inside InnoDB's 3072-byte key limit under utf8mb4. Longer URLs are skipped at parse time. |
+| Unknown/blocked URLs return 404, not 403 | Confirming that a project id exists but belongs to someone else is information the endpoint has no reason to give. |
+| Extraction walks the DOM instead of deleting nodes | The same document classifies links as in-content or furniture; deleting stripped regions would destroy the ancestry checks that decision depends on. |
+| Health check reports queue staleness | A queue-driven app whose worker is dead still answers HTTP. A backlog older than 5 minutes is the observable symptom, and the only one worth alerting on. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
+
+## The crawl pipeline (phase 1)
+
+```
+POST /projects  ──▶  ParseSitemapJob  ──▶  Bus::batch[ CrawlPageJob × N ]  ──▶  finally: status = done
+   (validate only)      SitemapCollector        SafeHttpFetcher → robots
+                        → SitemapParser         → ContentExtractor
+                        → page rows             → PageWriter (page + links)
+```
+
+Key classes, all under `app/Services/Crawl`:
+
+| Class | Responsibility |
+| --- | --- |
+| `UrlNormalizer` | One canonical spelling per page. Built per project from the sitemap URL. |
+| `SafeUrlGuard` | Refuses private, loopback, link-local and reserved destinations, in every IP notation. DNS is injected. |
+| `SafeHttpFetcher` | The **only** permitted outbound request path. Re-validates every redirect hop. |
+| `RobotsTxt` / `RobotsTxtRepository` | Parses and caches robots.txt per host. |
+| `SitemapParser` / `SitemapCollector` | One document, and the bounded recursion over an index. |
+| `ContentExtractor` | Main content vs furniture, and which links count as editorial. |
+| `PageWriter` | Persists a crawled page and resolves its links to page rows. |
+| `CrawlToolkit` | Builds the per-project collaborators; injected into jobs. |
 
 ## Testing rules
 
@@ -166,7 +194,7 @@ dashboard. The link graph is the product's hero.
 
 ## Build phases
 
-Phase 0 ✅ · Phase 1 crawl · Phase 2 link analysis · Phase 3 embeddings ·
+Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 link analysis · Phase 3 embeddings ·
 Phase 4 anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
 
 At the end of each phase: run tests, run linters, commit, summarise.

@@ -1,23 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
-import { Route, Routes } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
-import { ApiError, apiFetch } from './lib/api'
-import { useTheme } from './lib/theme-context'
-
-/**
- * Phase 0 shell. Real screens arrive with the routes that serve them; what this
- * proves is the full stack end to end — SPA to API across origins — and it fixes
- * the async-state vocabulary (skeleton, cold start, error with retry) that every
- * later screen reuses.
- */
-
-interface HealthResponse {
-  status: 'ok' | 'degraded'
-  checks: {
-    database: { ok: boolean; error?: string }
-    queue: { pending: number | null }
-  }
-}
+import { Button, Skeleton } from '@/components/primitives'
+import { useAuth } from '@/lib/auth-context'
+import { useTheme } from '@/lib/theme-context'
+import { AuthScreen } from '@/screens/AuthScreen'
+import { ProjectScreen } from '@/screens/ProjectScreen'
+import { ProjectsScreen } from '@/screens/ProjectsScreen'
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
@@ -34,105 +23,126 @@ function ThemeToggle() {
   )
 }
 
-function StatusSkeleton() {
+function Chrome({ children }: { children: ReactNode }) {
+  const { user, signOut } = useAuth()
+
   return (
-    <div className="space-y-2.5" aria-hidden="true">
-      <div className="rounded-hair bg-sunken h-3 w-40 animate-pulse" />
-      <div className="rounded-hair bg-sunken h-3 w-28 animate-pulse" />
+    <div className="bg-canvas min-h-dvh">
+      <header className="border-line border-b">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
+          <Link to="/projects" className="font-display text-ink text-xl font-semibold">
+            Linkweaver
+          </Link>
+          <div className="flex items-center gap-3">
+            {user !== null && (
+              <span className="text-ink-faint hidden font-mono text-xs sm:inline">
+                {user.email}
+              </span>
+            )}
+            <ThemeToggle />
+            {user !== null && (
+              <Button variant="quiet" onClick={signOut} className="px-2.5 py-1 text-xs">
+                Sign out
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+      {children}
     </div>
   )
 }
 
-function ApiStatus() {
-  const { data, error, isPending, isFetching, refetch } = useQuery({
-    queryKey: ['health'],
-    queryFn: () => apiFetch<HealthResponse>('/health'),
-  })
+/**
+ * Holds the route until the stored token has been checked. Rendering the login
+ * screen first and then redirecting would flash a sign-in form at users who are
+ * already signed in.
+ */
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user, isResolving } = useAuth()
+  const location = useLocation()
 
-  if (isPending) {
-    return <StatusSkeleton />
-  }
-
-  if (error) {
-    const isColdStart = error instanceof ApiError && error.kind === 'timeout'
-
+  if (isResolving) {
     return (
-      <div className="space-y-3">
-        <p className="text-ink-soft text-sm">
-          {isColdStart
-            ? 'The API is waking up. Free-tier servers sleep when idle; this usually takes a few seconds.'
-            : error instanceof ApiError
-              ? error.message
-              : 'Something went wrong reaching the API.'}
-        </p>
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-          className="rounded-hair bg-opportunity text-canvas hover:bg-opportunity-hover px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60"
-        >
-          {isFetching ? 'Retrying' : 'Try again'}
-        </button>
+      <div className="mx-auto max-w-4xl space-y-6 px-6 py-12">
+        <Skeleton className="h-9 w-56" />
+        <Skeleton className="h-14 w-full" />
       </div>
     )
   }
 
-  const healthy = data.status === 'ok'
+  if (user === null) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  }
 
-  return (
-    <dl className="space-y-2 text-sm">
-      <div className="flex items-baseline justify-between gap-6">
-        <dt className="text-ink-soft">API</dt>
-        <dd className={`tabular ${healthy ? 'text-opportunity' : 'text-orphan'}`}>{data.status}</dd>
-      </div>
-      <div className="flex items-baseline justify-between gap-6">
-        <dt className="text-ink-soft">Database</dt>
-        <dd className={`tabular ${data.checks.database.ok ? 'text-opportunity' : 'text-orphan'}`}>
-          {data.checks.database.ok ? 'connected' : 'unreachable'}
-        </dd>
-      </div>
-      <div className="flex items-baseline justify-between gap-6">
-        <dt className="text-ink-soft">Queued jobs</dt>
-        <dd className="tabular text-ink">{data.checks.queue.pending ?? '—'}</dd>
-      </div>
-    </dl>
-  )
+  return <Chrome>{children}</Chrome>
 }
 
-function Shell() {
-  return (
-    <div className="bg-canvas min-h-dvh">
-      <header className="border-line border-b">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-          <span className="font-display text-ink text-xl font-semibold tracking-tight">
-            Linkweaver
-          </span>
-          <ThemeToggle />
-        </div>
-      </header>
+function RedirectIfSignedIn({ children }: { children: ReactNode }) {
+  const { user, isResolving } = useAuth()
 
-      <main className="mx-auto max-w-5xl px-6 py-16">
-        <h1 className="font-display text-ink max-w-xl text-3xl leading-tight font-semibold sm:text-4xl">
-          Find the internal links your site is missing.
-        </h1>
-        <p className="text-ink-soft mt-4 max-w-lg">
-          Phase 0 scaffold. The crawler, link graph and suggestion review arrive in the phases that
-          follow.
-        </p>
+  if (isResolving) return null
+  if (user !== null) return <Navigate to="/projects" replace />
 
-        <section className="border-line bg-surface rounded-panel mt-12 max-w-sm border p-5">
-          <h2 className="text-ink-faint mb-4 font-mono text-xs">System status</h2>
-          <ApiStatus />
-        </section>
-      </main>
-    </div>
-  )
+  return <>{children}</>
 }
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Shell />} />
+      <Route path="/" element={<Navigate to="/projects" replace />} />
+
+      <Route
+        path="/login"
+        element={
+          <RedirectIfSignedIn>
+            <AuthScreen mode="login" />
+          </RedirectIfSignedIn>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <RedirectIfSignedIn>
+            <AuthScreen mode="register" />
+          </RedirectIfSignedIn>
+        }
+      />
+
+      <Route
+        path="/projects"
+        element={
+          <RequireAuth>
+            <ProjectsScreen />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/projects/:id"
+        element={
+          <RequireAuth>
+            <ProjectScreen />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="*"
+        element={
+          <Chrome>
+            <div className="mx-auto max-w-4xl px-6 py-24">
+              <h1 className="font-display text-ink text-3xl">Nothing here</h1>
+              <p className="text-ink-soft mt-2">That page does not exist.</p>
+              <Link
+                to="/projects"
+                className="text-opportunity mt-5 inline-block underline underline-offset-4"
+              >
+                Back to audits
+              </Link>
+            </div>
+          </Chrome>
+        }
+      />
     </Routes>
   )
 }
