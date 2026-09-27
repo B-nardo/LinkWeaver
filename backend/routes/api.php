@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DemoController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProjectController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\ProjectGraphController;
 use App\Http\Controllers\ProjectStatusController;
 use App\Http\Controllers\SuggestionController;
 use App\Http\Controllers\SuggestionExportController;
+use App\Http\Middleware\ResolveOptionalUser;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -43,22 +45,41 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->middleware('throttle:projects')
         ->name('projects.store');
 
-    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
-    Route::get('/projects/{project}/status', ProjectStatusController::class)->name('projects.status');
-
-    // Phase 2: the structural view of a crawled site.
-    Route::get('/projects/{project}/pages', [PageController::class, 'index'])->name('projects.pages');
-    Route::get('/projects/{project}/graph', ProjectGraphController::class)->name('projects.graph');
-
-    // Phase 4: reviewing and exporting suggested links.
-    Route::get('/projects/{project}/suggestions', [SuggestionController::class, 'index'])
-        ->name('projects.suggestions');
     Route::post('/projects/{project}/suggestions/bulk', [SuggestionController::class, 'bulk'])
         ->name('projects.suggestions.bulk');
     Route::patch('/suggestions/{suggestion}', [SuggestionController::class, 'update'])
         ->name('suggestions.update');
+});
+
+/*
+|------------------------------------------------------------------------------
+| Public, read-only
+|------------------------------------------------------------------------------
+|
+| Spec 6 requires the demo to be readable with no account. These routes are not
+| unguarded: ProjectPolicy takes a nullable user and permits only `is_demo`
+| projects to a guest, so an unauthenticated request for a real project gets the
+| same 404 it would get for one belonging to another user.
+|
+| A signed-in user reaching these routes is unaffected — the policy sees them
+| and applies ownership as before.
+|
+*/
+
+Route::get('/demo', DemoController::class)->name('demo');
+
+// ResolveOptionalUser, not auth:sanctum: a bearer token is honoured when sent,
+// and its absence is not an error. Without it these routes would authenticate
+// nobody, and a signed-in user would be treated as a guest on their own project.
+Route::middleware(ResolveOptionalUser::class)->group(function (): void {
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{project}/status', ProjectStatusController::class)->name('projects.status');
+    Route::get('/projects/{project}/pages', [PageController::class, 'index'])->name('projects.pages');
+    Route::get('/projects/{project}/graph', ProjectGraphController::class)->name('projects.graph');
+    Route::get('/projects/{project}/suggestions', [SuggestionController::class, 'index'])
+        ->name('projects.suggestions');
     Route::get('/projects/{project}/export.csv', SuggestionExportController::class)
         ->name('projects.export');
 });

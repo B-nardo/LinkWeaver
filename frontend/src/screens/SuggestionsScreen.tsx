@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { Button, EmptyState, ErrorState, Skeleton } from '@/components/primitives'
 import { getAuthToken } from '@/lib/api'
+import { useAuth } from '@/lib/auth-context'
 import { useBulkDecide, useDecideSuggestion, useSuggestions } from '@/lib/suggestions'
 import type { Suggestion, SuggestionQueryParams, SuggestionStatus } from '@/types'
 
@@ -58,6 +59,7 @@ function Row({
   onFocus,
   onToggleSelect,
   onDecide,
+  readOnly,
 }: {
   suggestion: Suggestion
   isFocused: boolean
@@ -65,6 +67,7 @@ function Row({
   onFocus: () => void
   onToggleSelect: () => void
   onDecide: (status: 'approved' | 'rejected') => void
+  readOnly: boolean
 }) {
   const decided = suggestion.status === 'approved' || suggestion.status === 'rejected'
 
@@ -80,6 +83,7 @@ function Row({
         <input
           type="checkbox"
           checked={isSelected}
+          disabled={readOnly}
           onChange={onToggleSelect}
           aria-label={`Select suggestion linking to ${suggestion.target?.title ?? 'page'}`}
           className="mt-1"
@@ -110,7 +114,9 @@ function Row({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {decided ? (
+          {readOnly ? (
+            <StatusPill status={suggestion.status} label={suggestion.status_label} />
+          ) : decided ? (
             <StatusPill status={suggestion.status} label={suggestion.status_label} />
           ) : (
             <>
@@ -150,6 +156,13 @@ export function SuggestionsScreen() {
     setFocusedIndex(0)
   }
 
+  const { user } = useAuth()
+
+  // The demo is readable without an account, so a visitor sees the queue but
+  // cannot change it. The API enforces this too; this keeps the interface from
+  // offering an action that would only fail.
+  const readOnly = user === null
+
   const { data, error, isPending, refetch } = useSuggestions(id, params)
   const decide = useDecideSuggestion(id)
   const bulk = useBulkDecide(id)
@@ -158,6 +171,8 @@ export function SuggestionsScreen() {
 
   const decideAt = useCallback(
     (index: number, status: 'approved' | 'rejected') => {
+      if (readOnly) return
+
       const row = rows[index]
       if (row === undefined) return
 
@@ -167,7 +182,7 @@ export function SuggestionsScreen() {
       // between each decision.
       setFocusedIndex((current) => Math.min(current + 1, Math.max(rows.length - 1, 0)))
     },
-    [rows, decide],
+    [rows, decide, readOnly],
   )
 
   useEffect(() => {
@@ -244,10 +259,23 @@ export function SuggestionsScreen() {
         <div>
           <h1 className="font-display text-ink text-3xl font-semibold">Suggested links</h1>
           <p className="text-ink-soft mt-1.5 text-sm">
-            Each anchor below already appears word for word on the source page. Press{' '}
-            <kbd className="border-line rounded-hair border px-1 font-mono text-xs">A</kbd> to
-            approve, <kbd className="border-line rounded-hair border px-1 font-mono text-xs">R</kbd>{' '}
-            to reject.
+            Each anchor below already appears word for word on the source page.{' '}
+            {readOnly ? (
+              <>
+                <Link to="/login" className="text-opportunity underline underline-offset-4">
+                  Sign in
+                </Link>{' '}
+                to review your own site.
+              </>
+            ) : (
+              <>
+                Press{' '}
+                <kbd className="border-line rounded-hair border px-1 font-mono text-xs">A</kbd> to
+                approve,{' '}
+                <kbd className="border-line rounded-hair border px-1 font-mono text-xs">R</kbd> to
+                reject.
+              </>
+            )}
           </p>
         </div>
         <Button variant="quiet" onClick={exportCsv}>
@@ -344,6 +372,7 @@ export function SuggestionsScreen() {
                   onFocus={() => setFocusedIndex(index)}
                   onToggleSelect={() => toggleSelect(suggestion.id)}
                   onDecide={(status) => decideAt(index, status)}
+                  readOnly={readOnly}
                 />
               ))}
             </ul>

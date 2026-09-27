@@ -5,6 +5,7 @@ import { Button, Skeleton } from '@/components/primitives'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 import { AuthScreen } from '@/screens/AuthScreen'
+import { LandingScreen } from '@/screens/LandingScreen'
 import { PagesScreen } from '@/screens/PagesScreen'
 import { ProjectScreen } from '@/screens/ProjectScreen'
 import { ProjectsScreen } from '@/screens/ProjectsScreen'
@@ -32,7 +33,10 @@ function Chrome({ children }: { children: ReactNode }) {
     <div className="bg-canvas min-h-dvh">
       <header className="border-line border-b">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
-          <Link to="/projects" className="font-display text-ink text-xl font-semibold">
+          <Link
+            to={user === null ? '/' : '/projects'}
+            className="font-display text-ink text-xl font-semibold"
+          >
             Linkweaver
           </Link>
           <div className="flex items-center gap-3">
@@ -42,10 +46,14 @@ function Chrome({ children }: { children: ReactNode }) {
               </span>
             )}
             <ThemeToggle />
-            {user !== null && (
+            {user !== null ? (
               <Button variant="quiet" onClick={signOut} className="px-2.5 py-1 text-xs">
                 Sign out
               </Button>
+            ) : (
+              <Link to="/login" className="text-ink-soft hover:text-ink text-sm">
+                Sign in
+              </Link>
             )}
           </div>
         </div>
@@ -92,7 +100,7 @@ function RedirectIfSignedIn({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/projects" replace />} />
+      <Route path="/" element={<LandingScreen />} />
 
       <Route
         path="/login"
@@ -122,25 +130,25 @@ export default function App() {
       <Route
         path="/projects/:id"
         element={
-          <RequireAuth>
+          <Chrome>
             <ProjectScreen />
-          </RequireAuth>
+          </Chrome>
         }
       />
       <Route
         path="/projects/:id/pages"
         element={
-          <RequireAuth>
+          <Chrome>
             <PagesScreen />
-          </RequireAuth>
+          </Chrome>
         }
       />
       <Route
         path="/projects/:id/suggestions"
         element={
-          <RequireAuth>
+          <Chrome>
             <SuggestionsScreen />
-          </RequireAuth>
+          </Chrome>
         }
       />
 

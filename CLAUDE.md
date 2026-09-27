@@ -187,6 +187,11 @@ dashboard. The link graph is the product's hero.
 | Anchor generation capped per project | `generateContent` cannot be batched, so it costs one request per candidate. A 200-page project produces ~1,000 candidates, which on a free-tier quota is over an hour. `LINKWEAVER_ANCHORS_PER_PROJECT` (100) spends the quota on the highest-priority candidates. |
 | The anchor job paces its own requests | `RateLimited` job middleware throttles how often a *job* runs, not the requests inside it. One job making 100 sequential calls consults the limiter once, so `GEMINI_REQUESTS_PER_MINUTE` was not being enforced. The job now sleeps between calls (faked in tests via `Sleep::fake()`). |
 | A failed candidate is marked, not deleted | Keeps it out of the review queue and stops the job paying for the same rejection on every future run. |
+| `ResolveOptionalUser` on the public routes | Sanctum resolves a bearer token only inside `auth:sanctum`. Taking routes out of it stops authenticating *anyone* on them, not just guests. This middleware switches the default guard to `sanctum`, so a token is honoured when sent and its absence is not an error. |
+| Read-only project routes are **public** | Spec 6 requires the demo to be readable with no account, and a demo you cannot open is not a demo. `ProjectPolicy` already takes a nullable user and permits only `is_demo` to a guest, so the policy decides rather than the route group. A guest asking for a real project gets 404, not 401 — the stronger answer. |
+| The demo fixture stores no embeddings | Nothing the demo displays reads them: the graph, pages table and suggestions all render from pages, links and suggestions. Keeps the fixture at 30 KB instead of megabytes of vectors. |
+| The demo fixture is generated, not hand-written | A script checks every anchor appears verbatim in the page it claims to come from before the fixture ships. It caught three bad anchors in my own draft. A demo contradicting the product's central claim would be worse than no demo. |
+| One container runs nginx, php-fpm **and** the queue worker | Unusual, and forced by spec 9's free-tier target: Render's free tier gives one service and no worker. An API container with no worker accepts projects and never processes them. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
 
@@ -323,6 +328,35 @@ This rate is **not** representative of a real site - real pages carry 400-1,500
 words and far more candidate phrasing. It has not been measured against real
 content, and should be before any claim is made about it.
 
+## Demo and deployment (phase 5)
+
+The public demo is seeded from `database/fixtures/demo-project.json` by
+`DemoProjectSeeder`, which is idempotent and part of the default seed, so
+`migrate:fresh --seed` and the container's boot sequence both produce a working
+demo. It performs no crawl and makes no Gemini call — the demo has to work on a
+cold container with no API key.
+
+To regenerate the fixture, edit and re-run the generator (kept out of the repo;
+see the Phase 5 notes). It refuses to write a fixture whose suggested anchors are
+not verbatim in their source pages.
+
+### Public surface
+
+`GET /api/demo` plus the read-only project routes (`show`, `status`, `pages`,
+`graph`, `suggestions`, `export.csv`) sit outside `auth:sanctum`.
+`PublicDemoTest` pins exactly how far that goes: a guest may read the demo, gets
+404 on any real project, and cannot list, create, delete or decide anything.
+The suggestions screen renders read-only for a signed-out visitor.
+
+### Container
+
+`Dockerfile` (multi-arch: Oracle Cloud Always Free is ARM) + `docker/`:
+nginx, php-fpm and one `queue:work` under Supervisor. The entrypoint waits for
+the database, migrates, seeds the demo, caches config/routes, then execs
+Supervisor. `PORT` is substituted at boot because Render assigns it.
+
+See `DEPLOYMENT.md` for Render, Oracle Cloud, and Cloudflare Pages/Netlify.
+
 ## Testing rules
 
 - **No test may touch the real network or the real Gemini API.** Use
@@ -330,6 +364,15 @@ content, and should be before any claim is made about it.
 - Unit tests get no application container (see `tests/Pest.php`): the
   correctness-critical classes are plain objects and must stay that way.
 - Feature tests use `RefreshDatabase`.
+- **`actingAs()` does not exercise token authentication.** It sets the user
+  directly on the guard, bypassing the middleware that resolves a Sanctum
+  bearer token. That hid a real bug: when the read-only project routes were
+  moved out of `auth:sanctum`, nothing resolved the token any more, so every
+  signed-in user was treated as a guest and got 404 on their own project —
+  while the `actingAs()` tests carried on passing. Anything asserting *who* a
+  request is authenticated as on the public routes must send a real token via
+  `withHeader('Authorization', 'Bearer ...')`. See the last block of
+  `PublicDemoTest`.
 - Fixtures live in `tests/Fixtures/`, mirroring real WordPress theme markup
   (Twenty Twenty-Four block markup, Astra, GeneratePress, plus one page with no
   semantic wrapper to exercise the readability fallback).
@@ -337,7 +380,7 @@ content, and should be before any claim is made about it.
 ## Build phases
 
 Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 ✅ link analysis · Phase 3 ✅ embeddings ·
-Phase 4 ✅ anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
+Phase 4 ✅ anchor suggestions · Phase 5 ✅ polish and deploy · Phase 6 WordPress.
 
 At the end of each phase: run tests, run linters, commit, summarise.
 

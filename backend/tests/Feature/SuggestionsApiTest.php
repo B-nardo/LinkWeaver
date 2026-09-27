@@ -51,10 +51,11 @@ function reviewableProject(?User $owner = null, int $count = 3): array
 }
 
 describe('listing', function (): void {
-    it('requires authentication', function (): void {
+    // Public route, so a guest gets 404 rather than 401 — see PublicDemoTest.
+    it('hides a real project from a guest', function (): void {
         $project = Project::factory()->create();
 
-        $this->getJson("/api/projects/{$project->id}/suggestions")->assertUnauthorized();
+        $this->getJson("/api/projects/{$project->id}/suggestions")->assertNotFound();
     });
 
     it('hides another user project behind a 404', function (): void {

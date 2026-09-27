@@ -1,0 +1,527 @@
+{
+    "pages": [
+        {
+            "slug": "commercial-property-insurance",
+            "title": "Commercial Property Insurance Explained",
+            "meta_description": "What commercial property insurance covers, who needs it, and how the sum insured is set.",
+            "headings": [
+                "Commercial Property Insurance Explained",
+                "How cover is settled",
+                "Setting the sum insured"
+            ],
+            "content_text": "Commercial property insurance protects the buildings, stock, plant and contents that a business depends on to trade. Most commercial policies settle claims on a reinstatement basis, which means the insurer pays what it costs to rebuild or replace, rather than the depreciated value of what was lost. That distinction matters enormously after a serious fire. Setting the sum insured too low triggers the average clause, and the insurer then reduces every payout by the same proportion that the property was underinsured. A formal valuation every three years is the simplest protection against that, and costs a fraction of the shortfall it prevents. Most firms buy business interruption cover alongside it, because the event that damages a building also stops the business trading. Firms operating from more than one site should ask their broker about a portfolio policy, which covers several locations under a single schedule and usually simplifies renewal considerably.",
+            "word_count": 150
+        },
+        {
+            "slug": "business-interruption",
+            "title": "Business Interruption Cover",
+            "meta_description": "How business interruption insurance replaces lost income, and why the indemnity period matters.",
+            "headings": [
+                "Business Interruption Cover",
+                "Choosing an indemnity period"
+            ],
+            "content_text": "Business interruption insurance replaces the income a company loses while its premises are unusable after an insured event such as a fire, a flood or a major escape of water. It is bought alongside property cover, because the same event triggers both, and a property claim alone rarely keeps a business solvent. The indemnity period is the single most important figure in the policy. It sets how long the insurer will keep paying, and twelve months is rarely long enough for a firm that must obtain planning permission, rebuild and then win back the customers it lost while closed. Twenty-four or thirty-six months is a more realistic choice for most manufacturers. Cover can also extend to losses caused by damage at a key supplier or customer.",
+            "word_count": 126
+        },
+        {
+            "slug": "underinsurance",
+            "title": "The Underinsurance Trap",
+            "meta_description": "Why the average clause turns a small shortfall in the sum insured into a large shortfall in every claim.",
+            "headings": [
+                "The Underinsurance Trap",
+                "How the average clause works"
+            ],
+            "content_text": "Underinsurance is the most common and most expensive mistake in commercial cover, and it is almost always accidental. Sums insured are set once when a policy is first arranged and then rolled forward at renewal, while building costs, stock values and wage rolls carry on rising. When a claim is made, the insurer compares the sum insured against the true reinstatement cost. If the figure is short, the average clause reduces the payout by the same proportion, so a building insured at half its rebuild cost receives half of even a modest claim. The remedy is unglamorous and effective: commission a proper valuation, review declared values annually, and tell your broker about extensions, new plant and rising stock levels as they happen rather than at renewal.",
+            "word_count": 126
+        },
+        {
+            "slug": "fleet-insurance",
+            "title": "Fleet Insurance for Small Firms",
+            "meta_description": "How fleet policies are priced, and when they beat insuring vehicles individually.",
+            "headings": [
+                "Fleet Insurance for Small Firms",
+                "When individual policies win"
+            ],
+            "content_text": "A fleet policy covers every vehicle a business operates under one renewal date and one claims history, which removes a great deal of administration and usually reduces the premium. Most insurers require five vehicles before they will quote on a fleet basis, though some brokers can place smaller fleets through a scheme. Premiums depend far more on driver profile and claims record than on the value of the vehicles themselves, so a young or inexperienced driver population costs more than an expensive van. Telematics is now widely offered and often pays for itself within a year through improved driving behaviour. Where vehicles are used seasonally, individual policies sometimes cost less overall, and it is worth asking your broker to price both structures before renewal.",
+            "word_count": 124
+        },
+        {
+            "slug": "employers-liability",
+            "title": "Employers Liability Explained",
+            "meta_description": "The compulsory cover every employer needs, and the limits that apply.",
+            "headings": [
+                "Employers Liability Explained",
+                "Who counts as an employee"
+            ],
+            "content_text": "Employers liability insurance is compulsory for almost every business in the United Kingdom that employs staff, and the certificate must be displayed where employees can read it. The minimum limit set out in legislation is five million pounds, although most insurers issue policies at ten million as standard because the difference in premium is negligible. Claims commonly arise from workplace injury, repetitive strain and long-tail industrial disease, and the policy responds on the basis of when the exposure happened rather than when the claim was finally made. That makes continuity of cover important, and it is why brokers keep historical certificates on file for decades. It is separate from public liability cover, which responds to injury to members of the public rather than to staff. Firms that use subcontractors should check carefully whether those workers count as employees, because the statutory definition is broader than most business owners expect.",
+            "word_count": 149
+        },
+        {
+            "slug": "public-liability",
+            "title": "Public Liability: What It Covers",
+            "meta_description": "Cover for injury or damage caused to third parties by your business activities.",
+            "headings": [
+                "Public Liability: What It Covers"
+            ],
+            "content_text": "Public liability insurance responds when a member of the public is injured, or their property is damaged, by your business activities. It covers legal defence costs as well as any damages awarded, and defence costs alone can be substantial even where a claim ultimately fails. Most commercial landlords, local authorities and main contractors require proof of public liability cover before granting a lease or awarding a contract, and the limit they demand has risen steadily. Two million pounds was once standard; five or ten million is now common on construction and public sector work. The policy does not cover injury to your own employees, which is what employers liability insurance is for, nor damage to property in your custody, which needs separate cover.",
+            "word_count": 123
+        },
+        {
+            "slug": "professional-indemnity",
+            "title": "Professional Indemnity for Consultants",
+            "meta_description": "Cover against claims that professional advice caused a client financial loss.",
+            "headings": [
+                "Professional Indemnity for Consultants",
+                "Claims-made cover"
+            ],
+            "content_text": "Professional indemnity insurance covers consultants, designers and advisers against claims that their advice or their work caused a client a financial loss. Cover is written on a claims-made basis, which means the policy in force when the claim is notified responds, not the policy in force when the advice was given. That has an important consequence: letting cover lapse after finishing a contract leaves you exposed to claims arising years later, which is why run-off cover exists and why it should be budgeted for when a business winds down. Many professional bodies require members to hold a minimum limit, and many client contracts specify a higher one. Check both before agreeing terms, because retrospectively increasing a limit is rarely possible.",
+            "word_count": 120
+        },
+        {
+            "slug": "cyber-cover",
+            "title": "Cyber Cover for Small Business",
+            "meta_description": "What cyber insurance pays for after a breach or ransomware attack.",
+            "headings": [
+                "Cyber Cover for Small Business",
+                "What a typical claim looks like"
+            ],
+            "content_text": "Cyber insurance covers the cost of responding to a data breach or a ransomware attack: forensic investigation to establish what happened, notifying affected customers, regulatory fines where they are insurable, and the income lost while systems are unavailable. Most small business claims do not involve sophisticated intrusion at all. They begin with a compromised email account, usually after a convincing phishing message, and the loss follows from fraudulent payment instructions sent from a genuine address. Good insurers now bundle an incident response retainer, which matters more than the limit for a small firm with no security team of its own. Multi-factor authentication on email is the single control that most reduces both the likelihood of a claim and the premium.",
+            "word_count": 120
+        },
+        {
+            "slug": "directors-officers",
+            "title": "Directors and Officers Liability",
+            "meta_description": "Personal protection for board members against claims arising from management decisions.",
+            "headings": [
+                "Directors and Officers Liability"
+            ],
+            "content_text": "Directors and officers liability insurance protects individual board members against claims arising from their management decisions. Directors are personally liable for those decisions, and the company indemnity that usually stands behind them fails at exactly the moment it is most needed, because an insolvent company cannot indemnify anyone. That is why this cover matters most in the circumstances where it is hardest to arrange. Claims come from shareholders, employees, regulators and insolvency practitioners, and the defence costs of a regulatory investigation can exhaust a small limit before any finding is made. Non-executive directors should confirm cover is in place, and confirm it continues after they step down, before accepting an appointment.",
+            "word_count": 111
+        },
+        {
+            "slug": "claims-process",
+            "title": "How We Handle Claims",
+            "meta_description": "What happens after you notify a claim, and how to make settlement faster.",
+            "headings": [
+                "How We Handle Claims",
+                "Before the adjuster arrives"
+            ],
+            "content_text": "When you notify a claim we acknowledge it within one working day and appoint a loss adjuster where the value of the loss warrants one. The single thing that most speeds up settlement is evidence gathered before anything is cleared away. Photograph the damage from several angles, keep damaged property until the adjuster has inspected it, and retain invoices for anything bought to limit further loss, because those costs are usually recoverable. Tell us early if the premises cannot be used, so that business interruption cover can be brought into the claim from the start rather than added weeks later. We deal with the insurer on your behalf throughout, and we will tell you plainly when we think an offer is too low.",
+            "word_count": 123
+        },
+        {
+            "slug": "renewal-checklist",
+            "title": "Your Policy Renewal Checklist",
+            "meta_description": "What to review before your commercial insurance renews.",
+            "headings": [
+                "Your Policy Renewal Checklist",
+                "Six weeks before renewal"
+            ],
+            "content_text": "Renewal is the one moment each year when everything can be corrected cheaply, and it is usually rushed. Six weeks beforehand, review the sums insured on buildings, plant and stock against what it would actually cost to replace them today. Confirm the indemnity period still reflects how long a rebuild would genuinely take, including planning permission. Update your declared turnover and wage roll, since both drive several premiums. Tell your broker about new premises, new vehicles, new activities and any work taken on outside your usual trade, because an undisclosed change is the most common reason a claim is disputed. Finally, ask what the insurer recommended at the last survey and whether those recommendations were completed, as outstanding items can affect terms.",
+            "word_count": 122
+        },
+        {
+            "slug": "risk-surveys",
+            "title": "What Happens During a Risk Survey",
+            "meta_description": "What a surveyor looks at, and what the recommendations mean.",
+            "headings": [
+                "What Happens During a Risk Survey",
+                "Requirements and recommendations"
+            ],
+            "content_text": "A risk survey is a visit by a surveyor acting for the insurer, who inspects the construction of the premises, the security arrangements, the fire protection and the general standard of housekeeping. It is not an inspection of your business, and it is not adversarial: the surveyor is establishing what the insurer is being asked to cover. The report is normally split between requirements, which must be completed within a stated period for cover to continue, and recommendations, which are optional but will usually improve terms at the next renewal. Most requirements are mundane, such as upgrading a lock or clearing combustible waste from against a wall. Completing them promptly and confirming in writing is the cheapest negotiating position a business can hold.",
+            "word_count": 123
+        },
+        {
+            "slug": "trade-credit",
+            "title": "Trade Credit Insurance",
+            "meta_description": "Cover against customers who fail to pay for goods already delivered.",
+            "headings": [
+                "Trade Credit Insurance"
+            ],
+            "content_text": "Trade credit insurance covers the risk that a customer fails to pay for goods or services that have already been delivered. It is bought by firms that sell on credit terms and could not absorb the loss of a major debtor, and it usually comes with credit limits that the insurer sets on each individual buyer. Those limits are the real value of the product: the insurer monitors the financial health of your customers continuously and will warn you before a limit is withdrawn, which is often the earliest warning a supplier gets that a buyer is in trouble. Policies normally require you to insure your whole ledger rather than selecting only the customers you are worried about.",
+            "word_count": 118
+        },
+        {
+            "slug": "about-us",
+            "title": "About Example Brokers",
+            "meta_description": "An independent commercial insurance broker working with small and medium businesses.",
+            "headings": [
+                "About Example Brokers"
+            ],
+            "content_text": "Example Brokers has arranged commercial insurance for small and medium businesses across the region since 1994. We are independent, which means we place each risk with whichever insurer offers the right cover at the right price, rather than working to the targets of a single provider. Most of our clients come to us through recommendation, and most stay for a long time. We are small enough that you will speak to the same person each year, and experienced enough to argue a disputed claim properly. Our work is concentrated in manufacturing, professional services, property owners and road transport, and we are happy to say when a risk falls outside what we know well.",
+            "word_count": 112
+        },
+        {
+            "slug": "contact",
+            "title": "Contact the Team",
+            "meta_description": "How to reach Example Brokers, including out of hours claims.",
+            "headings": [
+                "Contact the Team"
+            ],
+            "content_text": "Our office is open Monday to Friday from nine until five thirty. You can reach the team by telephone, by email, or by arranging a visit to your premises, which is usually the most productive way to review a commercial programme properly. Out of hours, claims can be notified directly to the insurer using the number printed on your policy schedule, and you should do so immediately for anything involving injury, fire or a break-in rather than waiting for the office to reopen. If you are considering moving your insurance to us, we will review your existing schedule without obligation and tell you honestly if we think your current arrangement is already competitive.",
+            "word_count": 113
+        }
+    ],
+    "links": [
+        {
+            "source": "commercial-property-insurance",
+            "target": "business-interruption",
+            "anchor_text": "business interruption cover",
+            "in_content": true
+        },
+        {
+            "source": "commercial-property-insurance",
+            "target": "underinsurance",
+            "anchor_text": "the average clause",
+            "in_content": true
+        },
+        {
+            "source": "business-interruption",
+            "target": "commercial-property-insurance",
+            "anchor_text": "property cover",
+            "in_content": true
+        },
+        {
+            "source": "underinsurance",
+            "target": "commercial-property-insurance",
+            "anchor_text": "reinstatement cost",
+            "in_content": true
+        },
+        {
+            "source": "employers-liability",
+            "target": "public-liability",
+            "anchor_text": "public liability cover",
+            "in_content": true
+        },
+        {
+            "source": "public-liability",
+            "target": "employers-liability",
+            "anchor_text": "employers liability insurance",
+            "in_content": true
+        },
+        {
+            "source": "claims-process",
+            "target": "business-interruption",
+            "anchor_text": "business interruption cover",
+            "in_content": true
+        },
+        {
+            "source": "renewal-checklist",
+            "target": "risk-surveys",
+            "anchor_text": "the last survey",
+            "in_content": true
+        },
+        {
+            "source": "risk-surveys",
+            "target": "renewal-checklist",
+            "anchor_text": "the next renewal",
+            "in_content": true
+        },
+        {
+            "source": "about-us",
+            "target": "claims-process",
+            "anchor_text": "a disputed claim",
+            "in_content": true
+        },
+        {
+            "source": "business-interruption",
+            "target": "claims-process",
+            "anchor_text": "a property claim",
+            "in_content": true
+        },
+        {
+            "source": "underinsurance",
+            "target": "renewal-checklist",
+            "anchor_text": "at renewal",
+            "in_content": true
+        },
+        {
+            "source": "renewal-checklist",
+            "target": "commercial-property-insurance",
+            "anchor_text": "the sums insured",
+            "in_content": true
+        },
+        {
+            "source": "risk-surveys",
+            "target": "commercial-property-insurance",
+            "anchor_text": "the premises",
+            "in_content": true
+        },
+        {
+            "source": "claims-process",
+            "target": "commercial-property-insurance",
+            "anchor_text": "damaged property",
+            "in_content": true
+        },
+        {
+            "source": "commercial-property-insurance",
+            "target": "risk-surveys",
+            "anchor_text": "a portfolio policy",
+            "in_content": true
+        },
+        {
+            "source": "public-liability",
+            "target": "claims-process",
+            "anchor_text": "legal defence costs",
+            "in_content": true
+        },
+        {
+            "source": "commercial-property-insurance",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "commercial-property-insurance",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "business-interruption",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "business-interruption",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "underinsurance",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "underinsurance",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "fleet-insurance",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "fleet-insurance",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "employers-liability",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "employers-liability",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "public-liability",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "public-liability",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "professional-indemnity",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "professional-indemnity",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "cyber-cover",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "cyber-cover",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "directors-officers",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "directors-officers",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "claims-process",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "claims-process",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "renewal-checklist",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "renewal-checklist",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "risk-surveys",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "risk-surveys",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "trade-credit",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        },
+        {
+            "source": "trade-credit",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "about-us",
+            "target": "contact",
+            "anchor_text": "Contact the Team",
+            "in_content": false
+        },
+        {
+            "source": "contact",
+            "target": "about-us",
+            "anchor_text": "About Example Brokers",
+            "in_content": false
+        }
+    ],
+    "suggestions": [
+        {
+            "source": "fleet-insurance",
+            "target": "claims-process",
+            "anchor_text": "claims record",
+            "context_sentence": "Premiums depend far more on driver profile and claims record than on the value of the vehicles themselves, so a young or inexperienced driver population costs more than an expensive van.",
+            "similarity": 0.86,
+            "priority_score": 0.91
+        },
+        {
+            "source": "cyber-cover",
+            "target": "business-interruption",
+            "anchor_text": "the income lost",
+            "context_sentence": "Cyber insurance covers the cost of responding to a data breach or a ransomware attack: forensic investigation to establish what happened, notifying affected customers, regulatory fines where they are insurable, and the income lost while systems are unavailable.",
+            "similarity": 0.852,
+            "priority_score": 0.895
+        },
+        {
+            "source": "professional-indemnity",
+            "target": "directors-officers",
+            "anchor_text": "professional indemnity insurance",
+            "context_sentence": "Professional indemnity insurance covers consultants, designers and advisers against claims that their advice or their work caused a client a financial loss.",
+            "similarity": 0.844,
+            "priority_score": 0.88
+        },
+        {
+            "source": "directors-officers",
+            "target": "professional-indemnity",
+            "anchor_text": "defence costs",
+            "context_sentence": "Claims come from shareholders, employees, regulators and insolvency practitioners, and the defence costs of a regulatory investigation can exhaust a small limit before any finding is made.",
+            "similarity": 0.836,
+            "priority_score": 0.865
+        },
+        {
+            "source": "trade-credit",
+            "target": "claims-process",
+            "anchor_text": "credit limits",
+            "context_sentence": "It is bought by firms that sell on credit terms and could not absorb the loss of a major debtor, and it usually comes with credit limits that the insurer sets on each individual buyer.",
+            "similarity": 0.828,
+            "priority_score": 0.85
+        },
+        {
+            "source": "business-interruption",
+            "target": "underinsurance",
+            "anchor_text": "the indemnity period",
+            "context_sentence": "The indemnity period is the single most important figure in the policy.",
+            "similarity": 0.82,
+            "priority_score": 0.835
+        },
+        {
+            "source": "claims-process",
+            "target": "renewal-checklist",
+            "anchor_text": "the premises cannot be used",
+            "context_sentence": "Tell us early if the premises cannot be used, so that business interruption cover can be brought into the claim from the start rather than added weeks later.",
+            "similarity": 0.812,
+            "priority_score": 0.82
+        },
+        {
+            "source": "underinsurance",
+            "target": "business-interruption",
+            "anchor_text": "wage rolls",
+            "context_sentence": "Sums insured are set once when a policy is first arranged and then rolled forward at renewal, while building costs, stock values and wage rolls carry on rising.",
+            "similarity": 0.804,
+            "priority_score": 0.805
+        },
+        {
+            "source": "about-us",
+            "target": "commercial-property-insurance",
+            "anchor_text": "property owners",
+            "context_sentence": "Our work is concentrated in manufacturing, professional services, property owners and road transport, and we are happy to say when a risk falls outside what we know well.",
+            "similarity": 0.796,
+            "priority_score": 0.79
+        },
+        {
+            "source": "fleet-insurance",
+            "target": "employers-liability",
+            "anchor_text": "driver profile",
+            "context_sentence": "Premiums depend far more on driver profile and claims record than on the value of the vehicles themselves, so a young or inexperienced driver population costs more than an expensive van.",
+            "similarity": 0.788,
+            "priority_score": 0.775
+        },
+        {
+            "source": "risk-surveys",
+            "target": "employers-liability",
+            "anchor_text": "the general standard",
+            "context_sentence": "A risk survey is a visit by a surveyor acting for the insurer, who inspects the construction of the premises, the security arrangements, the fire protection and the general standard of housekeeping.",
+            "similarity": 0.78,
+            "priority_score": 0.76
+        }
+    ]
+}

@@ -55,10 +55,13 @@ function siteWithOrphans(?User $owner = null): array
 }
 
 describe('access control', function (): void {
-    it('requires authentication', function (string $suffix): void {
+    // These routes are public so the demo can be read without an account
+    // (spec 6). A guest asking for a real project gets 404 rather than 401,
+    // which is the stronger answer: it does not confirm the project exists.
+    it('hides a real project from a guest', function (string $suffix): void {
         $project = Project::factory()->create();
 
-        $this->getJson("/api/projects/{$project->id}/{$suffix}")->assertUnauthorized();
+        $this->getJson("/api/projects/{$project->id}/{$suffix}")->assertNotFound();
     })->with(['pages', 'graph']);
 
     it('hides another user project behind a 404', function (string $suffix): void {

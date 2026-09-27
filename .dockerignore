@@ -1,0 +1,14 @@
+**/node_modules
+**/vendor
+**/.env
+**/.env.*
+!**/.env.example
+frontend/dist
+frontend
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/tests
+.git
+.github
+*.md
+!README.md
