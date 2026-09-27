@@ -116,3 +116,35 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # arm64 is built under emulation on an x86 runner, so QEMU is required.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Built for both architectures because Oracle Cloud's Always Free tier is
+      # ARM and Render is x86. A dependency that only resolves on one of them
+      # should fail here, not on a deploy.
+      - name: Build for amd64 and arm64
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The image is built against PHP 8.3, so a lock file resolved on a newer
+      # PHP will install here and then fail at runtime with a platform_check
+      # error. Asserting it directly is cheaper than discovering it on boot.
+      - name: Verify the lock file installs on PHP 8.3
+        run: docker run --rm -v "$PWD/backend:/app" -w /app composer:2 composer install --dry-run --no-interaction --no-scripts

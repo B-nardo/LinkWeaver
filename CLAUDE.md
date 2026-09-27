@@ -192,6 +192,8 @@ dashboard. The link graph is the product's hero.
 | The demo fixture stores no embeddings | Nothing the demo displays reads them: the graph, pages table and suggestions all render from pages, links and suggestions. Keeps the fixture at 30 KB instead of megabytes of vectors. |
 | The demo fixture is generated, not hand-written | A script checks every anchor appears verbatim in the page it claims to come from before the fixture ships. It caught three bad anchors in my own draft. A demo contradicting the product's central claim would be worse than no demo. |
 | One container runs nginx, php-fpm **and** the queue worker | Unusual, and forced by spec 9's free-tier target: Render's free tier gives one service and no worker. An API container with no worker accepts projects and never processes them. |
+| `config.platform.php` pinned to 8.3.0 in `composer.json` | Composer resolves against the PHP running it. On this 8.5 box that produced a lock requiring `php >=8.4.1` (all of Symfony 8.x), which installed fine locally and then died at runtime in the 8.3 container with a `platform_check` error — and would have failed the CI 8.3 leg on first push. Pinning makes the lock reflect the PHP the project claims to support. |
+| `symfony/css-selector` and `dom-crawler` allow `^7.0` | `composer require` pinned them to `^8.1` because the local PHP was 8.5. Symfony 8 needs PHP 8.4.1+, so the constraint alone made the project uninstallable on its own stated minimum. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
 
@@ -349,6 +351,13 @@ not verbatim in their source pages.
 The suggestions screen renders read-only for a signed-out visitor.
 
 ### Container
+
+Verified end to end on 2026-09-27: image builds, entrypoint waits for the
+database, migrates, seeds the demo, caches config, and Supervisor brings up
+nginx, php-fpm and the queue worker. `/api/health` returns `ok`, the public demo
+graph serves without auth, and the worker took a real job from `analyzing` to
+`done`.
+
 
 `Dockerfile` (multi-arch: Oracle Cloud Always Free is ARM) + `docker/`:
 nginx, php-fpm and one `queue:work` under Supervisor. The entrypoint waits for
