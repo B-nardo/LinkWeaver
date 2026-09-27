@@ -155,6 +155,11 @@ dashboard. The link graph is the product's hero.
 | Normalised URLs capped at 500 chars | Keeps `(project_id, normalized_url)` inside InnoDB's 3072-byte key limit under utf8mb4. Longer URLs are skipped at parse time. |
 | Unknown/blocked URLs return 404, not 403 | Confirming that a project id exists but belongs to someone else is information the endpoint has no reason to give. |
 | Extraction walks the DOM instead of deleting nodes | The same document classifies links as in-content or furniture; deleting stripped regions would destroy the ancestry checks that decision depends on. |
+| Orphan/weak computed on read, not stored | The composite index already covers the aggregate and projects are capped at a few hundred pages. A denormalised counter is one more thing that can silently drift from the links it describes. Phase 3 adds a real `AnalyzeProject` job, where similarity genuinely must be precomputed. |
+| Self-links excluded from inbound counts | A page must not rescue itself from orphanhood by linking to itself. Enforced in SQL via `whereColumn('source_page_id', '!=', 'target_page_id')`. |
+| Graph edges are editorial links only | Drawing navigation links produces a hairball where everything connects to everything, and the orphans — the entire point of the picture — disappear into the mesh. |
+| `uncrawled` reported alongside orphan counts | A page that failed to crawl has unknown outbound links, so anything it linked to may be falsely reported as an orphan. Caveated in the UI rather than silently wrong. |
+| The graph is lazy-loaded | `react-force-graph-2d` is ~60 kB gzipped and used on one screen. `React.lazy` keeps it out of the main bundle. It renders to canvas and does **not** pull in three.js. |
 | Health check reports queue staleness | A queue-driven app whose worker is dead still answers HTTP. A backlog older than 5 minutes is the observable symptom, and the only one worth alerting on. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
@@ -181,6 +186,29 @@ Key classes, all under `app/Services/Crawl`:
 | `PageWriter` | Persists a crawled page and resolves its links to page rows. |
 | `CrawlToolkit` | Builds the per-project collaborators; injected into jobs. |
 
+## Link analysis (phase 2)
+
+Derived on read from the `links` rows phase 1 already collected. Three rules
+decide whether the product tells the truth, and each has tests pinning it down:
+
+1. Only `in_content = true` links count. Navigation and footer links appear on
+   every page and would make every page look well linked.
+2. A page cannot rescue itself by linking to itself.
+3. A link whose `target_page_id` is null points at nothing we crawled.
+
+| Class | Responsibility |
+| --- | --- |
+| `PageClassification` | Orphan (0 inbound) / Weak (1–`weak_inbound_threshold`) / Linked. |
+| `PageLinkQuery` | Inbound and outbound counts as joined sub-queries, so filtering and sorting happen in SQL and pagination stays correct. |
+| `LinkGraphBuilder` | Nodes, edges and the overview summary. |
+
+Endpoints: `GET /projects/{uuid}/pages` (filter, sort, paginate) and
+`GET /projects/{uuid}/graph`.
+
+The graph has a table alternative **on the same screen**, not a separate route,
+so it is a real alternative rather than one users must discover. The standalone
+`/projects/:id/pages` route exists as well, for a linkable view.
+
 ## Testing rules
 
 - **No test may touch the real network or the real Gemini API.** Use
@@ -194,7 +222,7 @@ Key classes, all under `app/Services/Crawl`:
 
 ## Build phases
 
-Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 link analysis · Phase 3 embeddings ·
+Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 ✅ link analysis · Phase 3 embeddings ·
 Phase 4 anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
 
 At the end of each phase: run tests, run linters, commit, summarise.

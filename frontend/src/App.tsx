@@ -5,6 +5,7 @@ import { Button, Skeleton } from '@/components/primitives'
 import { useAuth } from '@/lib/auth-context'
 import { useTheme } from '@/lib/theme-context'
 import { AuthScreen } from '@/screens/AuthScreen'
+import { PagesScreen } from '@/screens/PagesScreen'
 import { ProjectScreen } from '@/screens/ProjectScreen'
 import { ProjectsScreen } from '@/screens/ProjectsScreen'
 
@@ -122,6 +123,14 @@ export default function App() {
         element={
           <RequireAuth>
             <ProjectScreen />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/projects/:id/pages"
+        element={
+          <RequireAuth>
+            <PagesScreen />
           </RequireAuth>
         }
       />

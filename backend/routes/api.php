@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectGraphController;
 use App\Http\Controllers\ProjectStatusController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +45,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
     Route::get('/projects/{project}/status', ProjectStatusController::class)->name('projects.status');
+
+    // Phase 2: the structural view of a crawled site.
+    Route::get('/projects/{project}/pages', [PageController::class, 'index'])->name('projects.pages');
+    Route::get('/projects/{project}/graph', ProjectGraphController::class)->name('projects.graph');
 });

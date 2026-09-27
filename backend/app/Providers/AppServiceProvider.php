@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\Analysis\LinkGraphBuilder;
+use App\Services\Analysis\PageLinkQuery;
 use App\Services\Crawl\Dns\DnsResolver;
 use App\Services\Crawl\Dns\SystemDnsResolver;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -18,6 +20,11 @@ final class AppServiceProvider extends ServiceProvider
         // Bound rather than auto-resolved so tests can swap in a fake resolver
         // and exercise SafeUrlGuard without touching real DNS.
         $this->app->bind(DnsResolver::class, SystemDnsResolver::class);
+
+        // Both read their thresholds from config rather than taking them as
+        // autowired primitives, so a controller can type-hint them directly.
+        $this->app->bind(PageLinkQuery::class, fn (): PageLinkQuery => PageLinkQuery::fromConfig());
+        $this->app->bind(LinkGraphBuilder::class, fn (): LinkGraphBuilder => LinkGraphBuilder::fromConfig());
     }
 
     public function boot(): void
