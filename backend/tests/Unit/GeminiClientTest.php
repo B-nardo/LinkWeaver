@@ -195,3 +195,125 @@ describe('configuration', function (): void {
             ->toThrow(GeminiConfigurationException::class, 'GEMINI_API_KEY');
     });
 });
+
+/*
+|------------------------------------------------------------------------------
+| Text generation
+|------------------------------------------------------------------------------
+|
+| Request shape confirmed against the live API, not the docs: the two Google
+| doc pages disagree, and only `generationConfig.responseMimeType` plus a
+| schema in Gemini's OpenAPI dialect (upper-case types, `nullable`) is actually
+| accepted. JSON-Schema syntax returns HTTP 400.
+|
+*/
+
+const TEXT_MODEL = 'gemini-3.5-flash-lite';
+
+function textResponse(string $text, string $finishReason = 'STOP'): array
+{
+    return [
+        'candidates' => [[
+            'content' => ['parts' => [['text' => $text]]],
+            'finishReason' => $finishReason,
+        ]],
+    ];
+}
+
+describe('generateJson', function (): void {
+    it('posts to generateContent for the configured model', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":null}'))]);
+
+        geminiClient($http)->generateJson('prompt', TEXT_MODEL);
+
+        $http->assertSent(fn (Request $request): bool => $request->url() ===
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent');
+    });
+
+    it('asks for JSON back', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":null}'))]);
+
+        geminiClient($http)->generateJson('prompt', TEXT_MODEL);
+
+        $http->assertSent(fn (Request $request): bool => $request->data()['generationConfig']['responseMimeType'] === 'application/json');
+    });
+
+    it('sends a schema in the dialect the API actually accepts', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":null}'))]);
+
+        $schema = ['type' => 'OBJECT', 'properties' => ['anchor' => ['type' => 'STRING', 'nullable' => true]]];
+
+        geminiClient($http)->generateJson('prompt', TEXT_MODEL, $schema);
+
+        $http->assertSent(fn (Request $request): bool => $request->data()['generationConfig']['responseSchema'] === $schema);
+    });
+
+    it('sends the prompt and generation settings', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":null}'))]);
+
+        geminiClient($http)->generateJson('find me an anchor', TEXT_MODEL, [], 0.3, 250);
+
+        $http->assertSent(function (Request $request): bool {
+            $body = $request->data();
+
+            return $body['contents'][0]['parts'][0]['text'] === 'find me an anchor'
+                && $body['generationConfig']['temperature'] === 0.3
+                && $body['generationConfig']['maxOutputTokens'] === 250;
+        });
+    });
+
+    it('returns the decoded payload', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":"average clause","sentence":"A sentence."}'))]);
+
+        expect(geminiClient($http)->generateJson('prompt', TEXT_MODEL))
+            ->toBe(['anchor' => 'average clause', 'sentence' => 'A sentence.']);
+    });
+
+    it('tolerates a markdown fence around the JSON', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse("```json\n{\"anchor\":\"x y\"}\n```"))]);
+
+        expect(geminiClient($http)->generateJson('prompt', TEXT_MODEL))->toBe(['anchor' => 'x y']);
+    });
+
+    it('returns null rather than throwing when the text is not JSON', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('I could not find a suitable anchor.'))]);
+
+        // One unusable answer should cost one candidate, not the whole job.
+        expect(geminiClient($http)->generateJson('prompt', TEXT_MODEL))->toBeNull();
+    });
+
+    it('returns null when the model was cut off mid-answer', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(textResponse('{"anchor":"trun', 'MAX_TOKENS'))]);
+
+        expect(geminiClient($http)->generateJson('prompt', TEXT_MODEL))->toBeNull();
+    });
+
+    it('returns null when safety filters removed the answer', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(['candidates' => [['finishReason' => 'SAFETY']]])]);
+
+        expect(geminiClient($http)->generateJson('prompt', TEXT_MODEL))->toBeNull();
+    });
+
+    it('still treats transport failures as it does elsewhere', function (): void {
+        $http = new HttpFactory;
+        $http->fake(['*' => $http::response(['error' => ['message' => 'Quota exceeded']], 429)]);
+
+        geminiClient($http)->generateJson('prompt', TEXT_MODEL);
+    })->throws(GeminiTransientException::class);
+
+    it('refuses to run without a text model configured', function (): void {
+        $http = new HttpFactory;
+        $http->fake();
+
+        geminiClient($http)->generateJson('prompt', '');
+    })->throws(GeminiConfigurationException::class);
+});

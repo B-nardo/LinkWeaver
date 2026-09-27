@@ -213,3 +213,48 @@ describe('degenerate input', function (): void {
             ->and($page->text)->toContain('Just a fragment');
     });
 });
+
+describe('headings', function (): void {
+    // Spec 5.7 rejects a suggested anchor that already sits inside a heading,
+    // so the crawl has to keep them rather than flattening them away.
+    it('collects headings from the main content', function (): void {
+        expect(extractFixture('astra.html')->headings)
+            ->toContain('When individual policies win');
+    });
+
+    it('includes the page h1', function (): void {
+        expect(extractFixture('astra.html')->headings)
+            ->toContain('Fleet Insurance for Small Firms');
+    });
+
+    it('ignores headings in navigation and related-post widgets', function (): void {
+        $headings = extractFixture('twentytwentyfour.html')->headings;
+
+        expect($headings)->not->toContain('Related reading');
+    });
+
+    it('returns an empty list when a page has no headings', function (): void {
+        $page = extractor()->extract(
+            '<html><body><main><p>'.str_repeat('Body words here. ', 40).'</p></main></body></html>',
+            'https://example.com/x/'
+        );
+
+        expect($page->headings)->toBe([]);
+    });
+
+    it('collapses whitespace inside a heading', function (): void {
+        $html = '<html><body><main><h2>  Spaced   heading  </h2><p>'
+            .str_repeat('Body words here. ', 40).'</p></main></body></html>';
+
+        expect(extractor()->extract($html, 'https://example.com/x/')->headings)
+            ->toBe(['Spaced heading']);
+    });
+
+    it('deduplicates repeated heading text', function (): void {
+        $html = '<html><body><main><h2>Repeated</h2><p>'
+            .str_repeat('Body words here. ', 40).'</p><h3>Repeated</h3></main></body></html>';
+
+        expect(extractor()->extract($html, 'https://example.com/x/')->headings)
+            ->toBe(['Repeated']);
+    });
+});

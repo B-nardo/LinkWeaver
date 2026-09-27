@@ -38,7 +38,9 @@ final class AnalyzeProjectJob implements ShouldQueue
 
         $candidates->generate($this->project);
 
-        $this->project->transitionTo(ProjectStatus::Done);
+        // Anchors are the last stage: it decides for itself whether Gemini is
+        // configured, and completes the project either way.
+        SuggestAnchorsJob::dispatch($this->project);
     }
 
     public function failed(Throwable $exception): void

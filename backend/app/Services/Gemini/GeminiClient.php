@@ -83,6 +83,84 @@ final class GeminiClient
     }
 
     /**
+     * Asks the text model for a JSON answer.
+     *
+     * Returns the decoded payload, or null when the model produced nothing
+     * usable — unparseable text, a truncated answer, or a response removed by
+     * safety filters. Those are per-candidate disappointments, not job
+     * failures, so they are reported as null rather than thrown; transport
+     * failures still throw, because those affect every candidate equally.
+     *
+     * The request shape was confirmed against the live API: `responseSchema`
+     * must use Gemini's OpenAPI dialect (`"type": "STRING"`, `"nullable": true`),
+     * not JSON-Schema syntax, which is rejected with HTTP 400.
+     *
+     * @param  array<string, mixed>  $schema
+     *
+     * @throws GeminiConfigurationException
+     * @throws GeminiRequestException
+     * @throws GeminiTransientException
+     */
+    public function generateJson(
+        string $prompt,
+        string $model,
+        array $schema = [],
+        float $temperature = 0.2,
+        int $maxOutputTokens = 300,
+    ): mixed {
+        if ($this->apiKey === '') {
+            throw GeminiConfigurationException::missing('GEMINI_API_KEY');
+        }
+
+        if ($model === '') {
+            throw GeminiConfigurationException::missing('GEMINI_TEXT_MODEL');
+        }
+
+        $generationConfig = [
+            'temperature' => $temperature,
+            'maxOutputTokens' => $maxOutputTokens,
+            'responseMimeType' => 'application/json',
+        ];
+
+        if ($schema !== []) {
+            $generationConfig['responseSchema'] = $schema;
+        }
+
+        $response = $this->post(
+            "{$this->baseUrl}/".self::API_VERSION."/models/{$model}:generateContent",
+            [
+                'contents' => [['parts' => [['text' => $prompt]]]],
+                'generationConfig' => $generationConfig,
+            ]
+        );
+
+        // A truncated answer is not partially usable: half a JSON object is
+        // just broken, and pretending otherwise produces an invented anchor.
+        if ($response->json('candidates.0.finishReason') !== 'STOP') {
+            return null;
+        }
+
+        $text = $response->json('candidates.0.content.parts.0.text');
+
+        return is_string($text) ? $this->decodeJson($text) : null;
+    }
+
+    /**
+     * Models still occasionally wrap JSON in a markdown fence despite being
+     * asked for `application/json`, so it is stripped before decoding.
+     */
+    private function decodeJson(string $text): mixed
+    {
+        $text = trim($text);
+
+        if (str_starts_with($text, '```')) {
+            $text = (string) preg_replace('/^```(?:json)?\s*|\s*```$/i', '', $text);
+        }
+
+        return json_decode(trim($text), true);
+    }
+
+    /**
      * @param  array<string, mixed>  $payload
      */
     private function post(string $url, array $payload): Response

@@ -24,6 +24,7 @@ final class PageWriter
             $page->forceFill([
                 'title' => $this->truncate($extracted->title, 255),
                 'h1' => $this->truncate($extracted->h1, 255),
+                'headings' => $extracted->headings,
                 'meta_description' => $extracted->metaDescription,
                 'content_text' => $extracted->text,
                 'content_hash' => $extracted->contentHash,

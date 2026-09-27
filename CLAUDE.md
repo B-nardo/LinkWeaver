@@ -183,6 +183,10 @@ dashboard. The link graph is the product's hero.
 | Gemini failures split into transient and permanent | The queue needs to know whether retrying is worth a worker. A 429 backs off; a rejected key fails the project immediately rather than burning four more attempts. |
 | No Gemini key completes the project rather than failing it | The crawl and link analysis are useful on their own — that is phase 2's whole promise. A missing key stops the pipeline cleanly at `done`. |
 | Health check reports queue staleness | A queue-driven app whose worker is dead still answers HTTP. A backlog older than 5 minutes is the observable symptom, and the only one worth alerting on. |
+| `headings` stored on pages | Spec 5.7 rejects an anchor already inside a link or a heading. Links were covered by `links.anchor_text`; headings were lost when extraction flattened the page. Storing the strings costs a few hundred bytes and makes the check exact rather than a guess. |
+| Anchor generation capped per project | `generateContent` cannot be batched, so it costs one request per candidate. A 200-page project produces ~1,000 candidates, which on a free-tier quota is over an hour. `LINKWEAVER_ANCHORS_PER_PROJECT` (100) spends the quota on the highest-priority candidates. |
+| The anchor job paces its own requests | `RateLimited` job middleware throttles how often a *job* runs, not the requests inside it. One job making 100 sequential calls consults the limiter once, so `GEMINI_REQUESTS_PER_MINUTE` was not being enforced. The job now sleeps between calls (faked in tests via `Sleep::fake()`). |
+| A failed candidate is marked, not deleted | Keeps it out of the review queue and stops the job paying for the same rejection on every future run. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
 
@@ -275,6 +279,50 @@ Request shapes were taken from Google's published reference, not from memory,
 per spec 2 — `batchEmbedContents` repeats the model inside every entry of the
 `requests` array, and it must match the model in the URL.
 
+## Anchor suggestions (phase 4)
+
+```
+AnalyzeProjectJob -> SuggestAnchorsJob -> done
+                       AnchorPrompt
+                       -> GeminiClient::generateJson
+                       -> AnchorValidator  -> store, or mark failed + log why
+```
+
+| Class | Responsibility |
+| --- | --- |
+| `AnchorPrompt` | Frames it as an extraction task, and builds Gemini's schema. |
+| `AnchorValidator` | The class that earns spec 5.7's "never store unvalidated model output". Pure. |
+| `AnchorCandidate` | Accepted / declined / rejected, with a reason for the last two. |
+
+Validation, in order: parses as a JSON object; `anchor` present; null means a
+legitimate decline; within the configured word range; **appears verbatim in the
+source content** (whole words, case and whitespace normalised); not inside an
+existing link's anchor text; not inside a heading.
+
+Endpoints: `GET /projects/{uuid}/suggestions`, `PATCH /suggestions/{id}`,
+`POST /projects/{uuid}/suggestions/bulk`, `GET /projects/{uuid}/export.csv`
+(streamed, approved only, UTF-8 BOM so Excel reads it correctly).
+
+### Gemini text API, verified live
+
+Google's own doc pages disagree on structured output. What the API actually
+accepts is `generationConfig.responseMimeType: "application/json"` plus,
+optionally, `responseSchema` in Gemini's **OpenAPI dialect** - `"type": "STRING"`,
+`"nullable": true`. JSON-Schema syntax (`"type": ["string","null"]`) is rejected
+with HTTP 400.
+
+### Measured acceptance rate
+
+On the synthetic demo project (16 pages of ~50 words each), **3 of 25**
+candidates produced a usable anchor. The dominant rejection reason was the model
+declining, which is correct behaviour when a 50-word page holds no suitable
+phrase; the next was paraphrasing, which is exactly what the validator exists to
+catch.
+
+This rate is **not** representative of a real site - real pages carry 400-1,500
+words and far more candidate phrasing. It has not been measured against real
+content, and should be before any claim is made about it.
+
 ## Testing rules
 
 - **No test may touch the real network or the real Gemini API.** Use
@@ -289,7 +337,7 @@ per spec 2 — `batchEmbedContents` repeats the model inside every entry of the
 ## Build phases
 
 Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 ✅ link analysis · Phase 3 ✅ embeddings ·
-Phase 4 anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
+Phase 4 ✅ anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
 
 At the end of each phase: run tests, run linters, commit, summarise.
 

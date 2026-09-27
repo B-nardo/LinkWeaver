@@ -106,3 +106,30 @@ export interface PageQueryParams {
   direction?: 'asc' | 'desc'
   page?: number
 }
+
+export type SuggestionStatus = 'pending' | 'approved' | 'rejected' | 'applied' | 'failed'
+
+export interface SuggestionPageRef {
+  id: number
+  title: string | null
+  url: string
+}
+
+export interface Suggestion {
+  id: number
+  anchor_text: string
+  context_sentence: string | null
+  similarity: number
+  priority_score: number
+  status: SuggestionStatus
+  status_label: string
+  source: SuggestionPageRef | null
+  target: SuggestionPageRef | null
+  created_at: string | null
+}
+
+export interface SuggestionQueryParams {
+  status?: SuggestionStatus | null
+  min_score?: number | null
+  page?: number
+}

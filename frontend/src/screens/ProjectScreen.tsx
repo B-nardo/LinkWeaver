@@ -126,6 +126,21 @@ function Analysis({ projectId, graph }: { projectId: string; graph: GraphPayload
         <Stat label="Internal links" value={graph.summary.edges} />
       </dl>
 
+      <div className="border-line bg-surface rounded-panel mt-8 flex flex-wrap items-center justify-between gap-4 border p-5">
+        <div>
+          <p className="text-ink font-medium">Suggested links</p>
+          <p className="text-ink-soft mt-0.5 text-sm">
+            Anchor text that already appears word for word on the source page, ready to review.
+          </p>
+        </div>
+        <Link
+          to={`/projects/${projectId}/suggestions`}
+          className="bg-opportunity text-canvas hover:bg-opportunity-hover rounded-hair px-3.5 py-2 text-sm font-medium transition-colors"
+        >
+          Review suggestions
+        </Link>
+      </div>
+
       {graph.summary.uncrawled > 0 && (
         <p className="border-line bg-sunken text-ink-soft rounded-hair mt-6 border p-3 text-sm">
           {graph.summary.uncrawled} {graph.summary.uncrawled === 1 ? 'page' : 'pages'} could not be

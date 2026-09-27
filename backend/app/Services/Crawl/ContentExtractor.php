@@ -90,14 +90,20 @@ final class ContentExtractor
             ? ''
             : $this->textOf($contentNode, $stripped);
 
+        $h1 = $this->firstText($xpath, '//h1');
+
         return new ExtractedPage(
             title: $this->firstText($xpath, '//title'),
-            h1: $this->firstText($xpath, '//h1'),
+            h1: $h1,
             metaDescription: $this->metaDescription($xpath),
             text: $text,
             wordCount: $this->countWords($text),
             contentHash: hash('sha256', $text),
             links: $this->extractLinks($xpath, $pageUrl, $contentNode, $stripped),
+            // The H1 is merged in deliberately: themes frequently wrap it in
+            // an <header> that the strip rules remove, but it is still a
+            // heading on the page as far as anchor validation is concerned.
+            headings: $this->extractHeadings($contentNode, $stripped, $h1),
             usedFallback: $usedFallback,
         );
     }
@@ -202,6 +208,51 @@ final class ContentExtractor
         }
 
         return array_values($links);
+    }
+
+    /**
+     * Headings inside the main content.
+     *
+     * Scoped to the content node and filtered through the same strip rules as
+     * the text, so a "Related reading" heading in a sidebar widget never counts
+     * as part of the page's own structure.
+     *
+     * @param  list<DOMNode>  $stripped
+     * @return list<string>
+     */
+    private function extractHeadings(?DOMNode $contentNode, array $stripped, ?string $h1): array
+    {
+        $headings = [];
+
+        if ($h1 !== null && $h1 !== '') {
+            $headings[$h1] = true;
+        }
+
+        if ($contentNode === null) {
+            return array_keys($headings);
+        }
+
+        $document = $contentNode->ownerDocument;
+
+        if ($document === null) {
+            return array_keys($headings);
+        }
+
+        foreach ((new DOMXPath($document))->query('.//h1|.//h2|.//h3|.//h4|.//h5|.//h6', $contentNode) ?: [] as $node) {
+            if ($this->isInsideAny($node, $stripped)) {
+                continue;
+            }
+
+            $text = $this->collapseWhitespace($node->textContent);
+
+            if ($text !== '') {
+                // Keyed to deduplicate: the same wording often appears as both
+                // the title and a heading.
+                $headings[$text] = true;
+            }
+        }
+
+        return array_keys($headings);
     }
 
     /**

@@ -8,6 +8,7 @@ import { AuthScreen } from '@/screens/AuthScreen'
 import { PagesScreen } from '@/screens/PagesScreen'
 import { ProjectScreen } from '@/screens/ProjectScreen'
 import { ProjectsScreen } from '@/screens/ProjectsScreen'
+import { SuggestionsScreen } from '@/screens/SuggestionsScreen'
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
@@ -131,6 +132,14 @@ export default function App() {
         element={
           <RequireAuth>
             <PagesScreen />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/projects/:id/suggestions"
+        element={
+          <RequireAuth>
+            <SuggestionsScreen />
           </RequireAuth>
         }
       />

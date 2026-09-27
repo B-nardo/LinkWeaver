@@ -27,6 +27,7 @@ final class Page extends Model
     protected function casts(): array
     {
         return [
+            'headings' => 'array',
             'crawled_at' => 'datetime',
             'word_count' => 'integer',
             'http_status' => 'integer',

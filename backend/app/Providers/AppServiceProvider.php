@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Services\Analysis\CandidateGenerator;
 use App\Services\Analysis\LinkGraphBuilder;
 use App\Services\Analysis\PageLinkQuery;
+use App\Services\Anchors\AnchorValidator;
 use App\Services\Crawl\Dns\DnsResolver;
 use App\Services\Crawl\Dns\SystemDnsResolver;
 use App\Services\Gemini\GeminiClient;
@@ -29,6 +30,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(PageLinkQuery::class, fn (): PageLinkQuery => PageLinkQuery::fromConfig());
         $this->app->bind(LinkGraphBuilder::class, fn (): LinkGraphBuilder => LinkGraphBuilder::fromConfig());
         $this->app->bind(CandidateGenerator::class, fn (): CandidateGenerator => CandidateGenerator::fromConfig());
+        $this->app->bind(AnchorValidator::class, fn (): AnchorValidator => AnchorValidator::fromConfig());
 
         $this->app->bind(
             GeminiClient::class,

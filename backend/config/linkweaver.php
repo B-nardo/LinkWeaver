@@ -164,6 +164,21 @@ return [
     'anchors' => [
         'min_words' => (int) env('LINKWEAVER_ANCHOR_MIN_WORDS', 2),
         'max_words' => (int) env('LINKWEAVER_ANCHOR_MAX_WORDS', 6),
+
+        // generateContent cannot be batched, so anchor generation costs one
+        // request per candidate. A 200-page project can produce ~1,000
+        // candidates, which at a free-tier rate limit is over an hour of
+        // queue time. Only the highest-priority candidates get an anchor;
+        // the rest stay as scored candidates the user can extend later.
+        'per_project' => (int) env('LINKWEAVER_ANCHORS_PER_PROJECT', 100),
+
+        // Words of source content sent as context for the anchor. Enough for
+        // the model to find a real phrase, small enough to stay cheap.
+        'context_words' => (int) env('LINKWEAVER_ANCHOR_CONTEXT_WORDS', 400),
+
+        // Low, because this is an extraction task, not a creative one: the
+        // anchor must already exist in the page.
+        'temperature' => (float) env('LINKWEAVER_ANCHOR_TEMPERATURE', 0.2),
     ],
 
     /*

@@ -15,6 +15,9 @@ final readonly class ExtractedPage
 {
     /**
      * @param  list<ExtractedLink>  $links
+     * @param  list<string>  $headings  Headings in the main content, used by the
+     *                                  anchor validator to reject a suggested
+     *                                  anchor that is already part of a heading.
      */
     public function __construct(
         public ?string $title,
@@ -24,6 +27,7 @@ final readonly class ExtractedPage
         public int $wordCount,
         public string $contentHash,
         public array $links,
+        public array $headings,
         public bool $usedFallback,
     ) {}
 
@@ -37,6 +41,7 @@ final readonly class ExtractedPage
             wordCount: 0,
             contentHash: hash('sha256', ''),
             links: [],
+            headings: [],
             usedFallback: false,
         );
     }

@@ -8,6 +8,8 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectGraphController;
 use App\Http\Controllers\ProjectStatusController;
+use App\Http\Controllers\SuggestionController;
+use App\Http\Controllers\SuggestionExportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,4 +51,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // Phase 2: the structural view of a crawled site.
     Route::get('/projects/{project}/pages', [PageController::class, 'index'])->name('projects.pages');
     Route::get('/projects/{project}/graph', ProjectGraphController::class)->name('projects.graph');
+
+    // Phase 4: reviewing and exporting suggested links.
+    Route::get('/projects/{project}/suggestions', [SuggestionController::class, 'index'])
+        ->name('projects.suggestions');
+    Route::post('/projects/{project}/suggestions/bulk', [SuggestionController::class, 'bulk'])
+        ->name('projects.suggestions.bulk');
+    Route::patch('/suggestions/{suggestion}', [SuggestionController::class, 'update'])
+        ->name('suggestions.update');
+    Route::get('/projects/{project}/export.csv', SuggestionExportController::class)
+        ->name('projects.export');
 });
