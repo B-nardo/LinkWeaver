@@ -125,13 +125,17 @@ final class ParseSitemapJob implements ShouldQueue
             ->name("crawl:{$project->id}")
             ->allowFailures()
             ->finally(static function () use ($project): void {
-                // Phase 1 ends at a crawled site. Embedding and analysis become
-                // the next links in this chain in phases 3 and 4.
                 $project->refresh();
 
-                if ($project->status !== ProjectStatus::Failed) {
-                    $project->transitionTo(ProjectStatus::Done);
+                if ($project->status === ProjectStatus::Failed) {
+                    return;
                 }
+
+                // Hand the project on to embedding, which decides for itself
+                // whether Gemini is configured and completes the project
+                // cleanly when it is not — the crawl and link analysis are
+                // worth having on their own.
+                GenerateEmbeddingsJob::dispatch($project);
             })
             ->dispatch();
     }

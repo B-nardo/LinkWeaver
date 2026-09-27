@@ -24,6 +24,15 @@
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <!--
+            Gemini is pinned to unconfigured so the suite behaves identically on
+            a machine with a real key in .env, on a machine without one, and in
+            CI. Tests that exercise the Gemini path opt in explicitly with
+            config()->set(), and fake every response.
+        -->
+        <env name="GEMINI_API_KEY" value=""/>
+        <env name="GEMINI_EMBED_MODEL" value=""/>
+        <env name="GEMINI_TEXT_MODEL" value=""/>
+        <!--
             This PHP build has no pdo_sqlite driver, so the suite runs against a
             dedicated MySQL database rather than SQLite in-memory. PHPUnit does
             not overwrite variables that already exist in the environment, so CI

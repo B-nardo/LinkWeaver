@@ -179,6 +179,18 @@ return [
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
         'embed_model' => env('GEMINI_EMBED_MODEL'),
+
+        // Dimensionality requested from the embedding model. 768 keeps a
+        // 200-page project near 2 MB of stored vectors and the same in memory
+        // during the all-pairs pass; 3072 costs roughly four times that for a
+        // negligible gain in ranking quality at this scale.
+        'embed_dimensions' => (int) env('GEMINI_EMBED_DIMENSIONS', 768),
+
+        // Words of page content sent to the embedding model, after the title
+        // and H1. Spec 5.5 asks for ~1,500, which fits gemini-embedding-2's
+        // 8,192-token limit comfortably but OVERFLOWS gemini-embedding-001's
+        // 2,048-token limit — drop this to ~1,200 if switching to that model.
+        'embed_words' => (int) env('GEMINI_EMBED_WORDS', 1500),
         'text_model' => env('GEMINI_TEXT_MODEL'),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com'),
         'timeout' => (int) env('GEMINI_TIMEOUT', 30),

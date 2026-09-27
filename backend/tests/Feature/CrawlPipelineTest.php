@@ -244,3 +244,47 @@ describe('sitemap indexes', function (): void {
         Http::assertNotSent(fn ($request): bool => str_contains($request->url(), 'category-sitemap'));
     });
 });
+
+describe('handing off to embedding', function (): void {
+    // Bus is deliberately not faked here: a faked batch never runs its
+    // `finally` callback, which is the very thing doing the handoff. These
+    // assert the observable result of the real chain instead.
+
+    it('runs embedding once the crawl batch finishes', function (): void {
+        config()->set('linkweaver.gemini.api_key', 'test-key');
+        config()->set('linkweaver.gemini.embed_model', 'gemini-embedding-2');
+
+        fakeSite([
+            '*batchEmbedContents' => Http::response([
+                'embeddings' => array_fill(0, 3, ['values' => [1.0, 0.0, 0.0]]),
+            ]),
+        ]);
+
+        $project = runPipeline();
+
+        expect(App\Models\Embedding::query()->count())->toBe(3)
+            ->and($project->pages_embedded)->toBe(3)
+            ->and($project->status)->toBe(ProjectStatus::Done);
+    });
+
+    it('does not embed a project whose sitemap failed', function (): void {
+        config()->set('linkweaver.gemini.api_key', 'test-key');
+        config()->set('linkweaver.gemini.embed_model', 'gemini-embedding-2');
+
+        fakeSite(['https://example.com/sitemap.xml' => Http::response('<html>nope</html>', 200)]);
+
+        $project = runPipeline();
+
+        expect($project->status)->toBe(ProjectStatus::Failed)
+            ->and(App\Models\Embedding::query()->count())->toBe(0);
+    });
+
+    it('still reaches done with no Gemini key configured', function (): void {
+        // The crawl and link analysis stand on their own; a missing key must
+        // not leave a perfectly good audit stuck mid-pipeline.
+        config()->set('linkweaver.gemini.api_key', '');
+        fakeSite();
+
+        expect(runPipeline()->status)->toBe(ProjectStatus::Done);
+    });
+});

@@ -81,6 +81,22 @@ Note that XAMPP's bundled MariaDB client cannot authenticate against MySQL 8
 at `C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe`, MySQL Workbench, or
 just go through PHP — `pdo_mysql` handles the auth plugin natively.
 
+### TLS certificates (Windows)
+
+Windows PHP ships without a CA bundle, so **every** outbound HTTPS call from PHP
+fails with `cURL error 60: unable to get local issuer certificate` — Gemini
+included, and the queue worker with it. Download a current bundle from
+`https://curl.se/ca/cacert.pem` and point `php.ini` at it:
+
+```ini
+curl.cainfo = "C:\Users\<you>\.certs\cacert.pem"
+openssl.cafile = "C:\Users\<you>\.certs\cacert.pem"
+```
+
+XAMPP bundles one at `C:\xampp\apache\bin\curl-ca-bundle.crt`, but it dates from
+2022; prefer a freshly downloaded one. Local setup only — Linux containers and
+CI already carry a system bundle.
+
 `phpunit.xml` points the suite at `linkweaver_test`. PHPUnit does not overwrite
 variables already present in the environment, so CI overrides `DB_*` via job
 `env:` without editing the file.
@@ -160,6 +176,12 @@ dashboard. The link graph is the product's hero.
 | Graph edges are editorial links only | Drawing navigation links produces a hairball where everything connects to everything, and the orphans — the entire point of the picture — disappear into the mesh. |
 | `uncrawled` reported alongside orphan counts | A page that failed to crawl has unknown outbound links, so anything it linked to may be falsely reported as an orphan. Caveated in the UI rather than silently wrong. |
 | The graph is lazy-loaded | `react-force-graph-2d` is ~60 kB gzipped and used on one screen. `React.lazy` keeps it out of the main bundle. It renders to canvas and does **not** pull in three.js. |
+| Vectors normalised at write time | Similarity then reduces to a dot product. At the 200-page cap the all-pairs pass is ~20,000 comparisons of 768-element vectors, and recomputing two magnitudes inside that loop trebles the arithmetic for nothing. |
+| Embedding cache keyed on `(page_id, model, content_hash)` | Re-running a project spends quota only on pages whose content changed, and switching models re-embeds everything rather than comparing vectors that were never comparable. |
+| 768 dimensions, not 3072 | ~2 MB of stored vectors for a 200-page project instead of ~7 MB, and the same again in memory during analysis. Ranking quality at this scale is indistinguishable. |
+| `gemini-embedding-2`, not `-001` | `-001` caps input at 2,048 tokens, which the spec's ~1,500-word window overflows. `-2` allows 8,192. Lower `GEMINI_EMBED_WORDS` to ~1200 if you switch. |
+| Gemini failures split into transient and permanent | The queue needs to know whether retrying is worth a worker. A 429 backs off; a rejected key fails the project immediately rather than burning four more attempts. |
+| No Gemini key completes the project rather than failing it | The crawl and link analysis are useful on their own — that is phase 2's whole promise. A missing key stops the pipeline cleanly at `done`. |
 | Health check reports queue staleness | A queue-driven app whose worker is dead still answers HTTP. A backlog older than 5 minutes is the observable symptom, and the only one worth alerting on. |
 | `laravel/boost` **not** installed | Laravel 13 scaffolds a `CLAUDE.md` recommending it; it is outside the spec's dependency list. |
 | Backend `package.json` and `resources/js` deleted | The API serves JSON only; the SPA owns all assets. |
@@ -209,6 +231,50 @@ The graph has a table alternative **on the same screen**, not a separate route,
 so it is a real alternative rather than one users must discover. The standalone
 `/projects/:id/pages` route exists as well, for a linkable view.
 
+## Embeddings and candidates (phase 3)
+
+```
+crawl batch finishes ─▶ GenerateEmbeddingsJob ─▶ AnalyzeProjectJob ─▶ done
+                          EmbeddingText            SimilarityCalculator
+                          → GeminiClient           → PriorityScore
+                          → normalised vector      → CandidateGenerator
+```
+
+| Class | Responsibility |
+| --- | --- |
+| `GeminiClient` | The only thing that talks to Gemini. Classifies failure as transient or permanent and lets nothing else leak out. |
+| `EmbeddingText` | Title + H1 + first N words, with the H1 dropped when it merely restates the title. |
+| `SimilarityCalculator` | Normalisation, cosine, and the dot-product shortcut. Pure and static. |
+| `PriorityScore` | `similarity x w1 + scarcity x w2`, normalised by the weights so the result stays in [0, 1]. |
+| `CandidateGenerator` | All-pairs comparison, excluding self-pairs and pairs the source already links to editorially. |
+
+A phase 3 candidate is a `pending` suggestion with a null `anchor_text`; phase 4
+fills it in. `Suggestion::awaitingAnchor()` finds them.
+
+### Measured similarity range
+
+`gemini-embedding-2` at 768 dimensions has a **compressed** similarity range.
+Measured live against a real 16-page commercial insurance site, all 120 page
+pairs scored between **0.60 and 0.87**, median 0.73. Unrelated pages do not
+score near zero: the least related pair on the whole site still scored 0.60.
+
+`similarity_threshold` is therefore a relative cut, not an absolute measure of
+relatedness. The spec's 0.75 is well calibrated for page-length content — it
+kept 29 of 120 pairs — while 0.70 would keep 99 of 120, which is nearly
+everything. Measure the distribution on your own content before changing it,
+and note that short texts compress the range further still.
+
+The model already returns unit-length vectors at 768 dimensions, so normalising
+on write is currently a no-op. It is kept because it is idempotent and because
+that guarantee does not hold at every `output_dimensionality`.
+
+Tests pin `GEMINI_*` to empty in `phpunit.xml`, so the suite behaves the same
+whether or not the developer has a real key in `.env`.
+
+Request shapes were taken from Google's published reference, not from memory,
+per spec 2 — `batchEmbedContents` repeats the model inside every entry of the
+`requests` array, and it must match the model in the URL.
+
 ## Testing rules
 
 - **No test may touch the real network or the real Gemini API.** Use
@@ -222,7 +288,7 @@ so it is a real alternative rather than one users must discover. The standalone
 
 ## Build phases
 
-Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 ✅ link analysis · Phase 3 embeddings ·
+Phase 0 ✅ · Phase 1 ✅ crawl · Phase 2 ✅ link analysis · Phase 3 ✅ embeddings ·
 Phase 4 anchor suggestions · Phase 5 polish and deploy · Phase 6 WordPress.
 
 At the end of each phase: run tests, run linters, commit, summarise.
